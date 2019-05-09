@@ -8,7 +8,6 @@ Vue.use(Router)
 export const constantRouterMap = [
     { path: '/login', component: () => import('@/views/login/index'), hidden: true },
     { path: '/404', component: () => import('@/views/404'), hidden: true },
-
     {
         path: '/',
         component: Layout,
@@ -20,13 +19,13 @@ export const constantRouterMap = [
             component: () => import('@/views/dashboard/index')
         }]
     },
+    { path: '*', redirect: '/404', hidden: true },
 
     {
         path: '/example',
         component: Layout,
         redirect: '/example/table',
         name: 'Example',
-        // meta: { title: 'Example', icon: 'example' },
         meta: { title: 'Example', icon: 'icon-fenleiorguangchangorqitatianchong' },
         children: [
             {
@@ -39,7 +38,6 @@ export const constantRouterMap = [
                 path: 'tree',
                 name: 'Tree',
                 component: () => import('@/views/tree/index'),
-                // meta: { title: 'Tree', icon: 'tree' }
                 meta: { title: 'Tree', icon: 'icon-gengduotianchong' }
             }
         ]
@@ -116,7 +114,6 @@ export const constantRouterMap = [
         ]
     },
 
-    { path: '*', redirect: '/404', hidden: true }
 ];
 export default new Router({
     mode: "history",
