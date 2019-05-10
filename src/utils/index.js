@@ -56,3 +56,29 @@ export function formatTime(time, option) {
     return d.getMonth() + 1 + '月' + d.getDate() + '日' + d.getHours() + '时' + d.getMinutes() + '分'
   }
 }
+export function formatterColumn(type) {
+  //状态改成汉字
+    switch(type){
+        case 1:
+          return '生效中';
+        break;
+
+        case 2:
+          return '已作废';
+        break;
+
+        case 3:
+          return '未支付';
+        break;
+
+        case 8:
+          return '已生效';
+        break;
+
+        case 7:
+          return '投保失败';
+        break;
+        default:
+          return '';
+    }
+}

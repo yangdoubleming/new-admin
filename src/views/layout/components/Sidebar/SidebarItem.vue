@@ -3,21 +3,20 @@
 
       <el-submenu :index="item.title||item.class">
         <template slot="title">
-          <i class="el-icon-delete"></i>
+          <i class="el-icon-folder"></i>
           <span v-if="item.title" slot="title">{{item.title}}</span>
         </template>
 
         <template v-for="child in item.list" >
-          <sidebar-item :is-nest="true" class="nest-menu" v-if="child.list&&child.list.length>0" :item="child" :key="child.name" :base-path="resolvePath(child.name)"></sidebar-item>
-          <router-link v-else :to="resolvePath(child.name)" :key="child.name">
-            <el-menu-item :index="resolvePath(child.name)">
-                <i class="el-icon-delete"></i>
+          <sidebar-item :is-nest="true" class="nest-menu" v-if="child.list&&child.list.length>0" :item="child" :key="child.name" :base-path="resolvePath(item.class)"></sidebar-item>
+          <router-link v-else :to="resolvePath(`${item.class}/${child.url}`)" :key="child.name">
+            <el-menu-item :index="resolvePath(`${item.class}/${child.url}`)">
+                <i class="el-icon-folder"></i>
               <span v-if="child.name" slot="title">{{child.name}}</span>
             </el-menu-item>
           </router-link>
         </template>
       </el-submenu>
-
   </div>
 </template>
 
