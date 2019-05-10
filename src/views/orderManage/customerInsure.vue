@@ -34,9 +34,9 @@
                 </el-form-item>
                 <el-form-item>
                     <el-button @click="resetForm('ruleForm')">重置</el-button>
-                    <el-button @click="resetForm('ruleForm')">新增投保</el-button>
+                    <el-button><router-link to="/orderManage/customerInsureAdd">新增投保</router-link></el-button>
                     <el-button @click="resetForm('ruleForm')">导出excel</el-button>
-                    <el-button @click="resetForm('ruleForm')">亚马逊授权投保</el-button>
+                    <el-button @click="amazonAgree">亚马逊授权投保</el-button>
                     <el-button type="primary" @click="submitForm('ruleForm')">查询</el-button>
                 </el-form-item>
             </el-form>
@@ -193,6 +193,19 @@
             },
             customerInsureDetails(row){
                 this.$router.push({path:'/orderManage/customerInsureDetails',query: {id:row.id,productId:row.productId}})
+            },
+            amazonAgree(){
+                this.$confirm('该功能需要完成平台授权后使用！', '提示', {
+                    confirmButtonText: '去授权',
+                    cancelButtonText: '取消',
+                    type: 'info',
+                    center: true
+                }).then(() => {
+                    this.$router.push({path:'/orderManage/amazonAgree'})
+                }).catch(() => {
+                    
+                });
+
             }
         }
     }      

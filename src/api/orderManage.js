@@ -15,3 +15,18 @@ export function getCusInsureDetails(params) {
         params: params
     })
 }
+
+export function findCompanyBySource(source) {
+    return request({
+        url: `/order/findCompanyBySource/${source}`,
+        method: 'get'
+    })
+}
+
+export function combinationsByProductId(params) {
+    return request({
+        url: `/apply/combinationsByProductId`,
+        method: 'post',
+        data: params
+    })
+}

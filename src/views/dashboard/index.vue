@@ -1,6 +1,6 @@
 <template>
   <div class="dashboard-container">
-    <div class="dashboard-text">name:{{user.username}}</div>
+    <div class="dashboard-text">name:{{user.companyName}}</div>
   </div>
 </template>
 

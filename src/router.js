@@ -37,6 +37,18 @@ export const constantRouterMap = [
                 name: 'customerInsureDetails',
                 component: () => import('@/views/orderManage/customerInsureDetails'),
                 meta: { title: '保单详情' }
+            },
+            {
+                path: 'customerInsureAdd',
+                name: 'customerInsureAdd',
+                component: () => import('@/views/orderManage/customerInsureAdd'),
+                meta: { title: '新增保单' }
+            },
+            {
+                path: 'amazonAgree',
+                name: 'amazonAgree',
+                component: () => import('@/views/orderManage/amazonAgree'),
+                meta: { title: '亚马逊授权投保' }
             }
         ]
     },

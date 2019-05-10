@@ -3,7 +3,7 @@
     <el-card class="box-card" shadow="hover">
       <div slot="header" class="clearfix">
           <span>基本信息</span>
-          <el-button style="float: right; padding: 3px 0" type="text" @click="goBack">返回</el-button>
+          <el-button style="float: right; padding: 3px 0" type="text"><router-link to="/orderManage/customerInsure">返回</router-link></el-button>
       </div>
       <el-row type="flex" class="row-bg" justify="space-between">
         <el-col :span="8"><div class="grid-content bg-purple">订单号：<span>{{details.ticketNo}}</span></div></el-col>
@@ -83,8 +83,8 @@
               getCusInsureDetails(this.$route.query).then(response => {
                   if(response.data&&response.data.length>0){
                     this.details = response.data[0]
-                    this.loading = false;
                   }
+                  this.loading = false;
               }).catch(err=>{
                   this.loading = false;
                   this.$message.error(err);
@@ -95,9 +95,6 @@
                 return "";
             }
             return moment(date).format("YYYY-MM-DD HH:mm:ss")
-          },
-          goBack(){
-            this.$router.push({path:'/orderManage/customerInsure'})
           }
         }
     }      
