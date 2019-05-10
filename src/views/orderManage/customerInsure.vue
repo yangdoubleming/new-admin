@@ -71,7 +71,7 @@
                         去支付
                     </el-button>
                     <el-button
-                        @click.native.prevent="customerInsureDetails(scope.$index, tableData)"
+                        @click="customerInsureDetails(scope.row)"
                         type="text"
                         size="small">
                         详情
@@ -86,7 +86,7 @@
                 @size-change="handleSizeChange"
                 @current-change="handleCurrentChange"
                 :current-page="ruleForm.pageNum"
-                :page-sizes="[10, 1, 30, 50]"
+                :page-sizes="[10, 20, 30, 50]"
                 :page-size="ruleForm.pageSize"
                 layout="total, sizes, prev, pager, next, jumper"
                 :total="total">
@@ -107,6 +107,7 @@
             return {
                 tableData: [],
                 total:0,
+                listLoading:true,
                 ruleForm: {
                     applyEndTime: "",
                     applyStartTime: "",
@@ -139,11 +140,12 @@
         },
         methods: {
             fetchData() {
-                this.listLoading = true
                 getList(this.ruleForm).then(response => {
                     this.tableData = response.data.list
                     this.total = response.data.total
                     this.listLoading = false
+                }).catch(err=>{
+                    this.$message.error(err);
                 })
             },
             handleSizeChange(val) {
@@ -189,8 +191,8 @@
             statusText(row, column){
                 return formatterColumn(row.status)
             },
-            customerInsureDetails(){
-                this.$router.push({name:'/orderManage/customerInsureDetails',params: {id:'1'}})
+            customerInsureDetails(row){
+                this.$router.push({path:'/orderManage/customerInsureDetails',query: {id:row.id,productId:row.productId}})
             }
         }
     }      

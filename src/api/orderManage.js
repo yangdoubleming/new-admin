@@ -7,3 +7,11 @@ export function getList(params) {
         data: params
     })
 }
+
+export function getCusInsureDetails(params) {
+    return request({
+        url: '/order/orderList',
+        method: 'get',
+        params: params
+    })
+}
