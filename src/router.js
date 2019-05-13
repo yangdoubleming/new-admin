@@ -53,6 +53,20 @@ export const constantRouterMap = [
         ]
     },
 
+    // 账户中心
+    {
+        path: '/accountCenter',
+        component: Layout,
+        children: [
+            {
+                path: 'recharge',
+                name: 'recharge',
+                component: () => import('@/views/accountCenter/recharge'),
+                meta: { title: '账户信息'}
+            }
+        ]
+    },
+
 ];
 export default new Router({
     mode: "history",

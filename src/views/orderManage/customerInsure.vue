@@ -65,7 +65,7 @@
                     </el-button>
                     <el-button
                         v-if="scope.row.status == 3"
-                        @click.native.prevent="customerInsureDetails(scope.$index, tableData)"
+                        @click.native.prevent="confirmToPay(scope.row)"
                         type="text"
                         size="small">
                         去支付
@@ -101,6 +101,8 @@
     import moment from 'moment'
     import { getList } from '@/api/orderManage'
     import { formatterColumn } from "@/utils";
+    import { mapGetters } from 'vuex'
+    import { getBalance, accountInfo, goPay } from '@/api/orderManage'
 
     export default {
         data() {
@@ -129,11 +131,20 @@
                     telephone: [
                         { }
                     ]
+                },
+                payInfo: {
+                    ticketNo: '',
+                    discountAmount: '',
+                    balance: '',
+                    source:'',
+                    productName:''
                 }
             }
         },
         computed: {
-            
+            ...mapGetters([
+                'user'
+            ])
         },
         created() {
             this.fetchData()
@@ -206,6 +217,38 @@
                     
                 });
 
+            },
+
+            //去支付
+            confirmToPay(row){
+                getBalance({ username: this.user.username }).then(res => {
+                    accountInfo({t:res.data.ticket}).then(result => {
+                    this.payInfo.balance = result.data.info.subAccountInfos[0].subAccountRechargeBalance;//余额
+                    this.payInfo.productName = row.productName;
+                    this.payInfo.source = this.user.source;
+                    this.payInfo.ticketNo = row.ticketNo;
+                    this.payInfo.discountAmount = row.discountAmount / 100;
+                    this.$confirm(`<div style="font-size:16px">本次投保产品：<span style="color:red;">${this.payInfo.productName}</span></div><div style="font-size:16px">投保金额：<span style="color:red;">${this.payInfo.discountAmount}</span></div><div style="font-size:16px">余额：<span style="color:red;">${this.payInfo.balance}</span></div>`, '确认信息', {
+                            distinguishCancelAndClose: true,
+                            dangerouslyUseHTMLString: true,
+                            center: true,
+                            cancelButtonText: '取消',
+                            confirmButtonText: '确认支付'
+                        })
+                        .then(() => {
+                            goPay(this.payInfo).then(result=>{
+                            console.log(8888,result)
+                            this.$message.success(result.msg);
+                            }).catch(err =>{
+                            this.$message.error(err);
+                            })
+                        })
+                        .catch(action => {
+                            
+                        });
+                    })
+                })
+                
             }
         }
     }      
