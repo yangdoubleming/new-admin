@@ -57,14 +57,14 @@
             <el-table-column prop="name" label="操作" fixed="right" width="180">
                 <template slot-scope="scope">
                     <el-button
-                        v-if="scope.claim == 0 && scope.status == 8"
+                        v-if="scope.row.claim == 0 && scope.row.status == 8"
                         @click.native.prevent="customerInsureDetails(scope.$index, tableData)"
                         type="text"
                         size="small">
                         发起理赔
                     </el-button>
                     <el-button
-                        v-if="scope.status == 3"
+                        v-if="scope.row.status == 3"
                         @click.native.prevent="customerInsureDetails(scope.$index, tableData)"
                         type="text"
                         size="small">
