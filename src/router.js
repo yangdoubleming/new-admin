@@ -53,6 +53,26 @@ export const constantRouterMap = [
         ]
     },
 
+    // 理赔管理
+    {
+        path: '/claimManage',
+        component: Layout,
+        children: [
+            {
+                path: 'claimOrder',
+                name: 'claimOrder',
+                component: () => import('@/views/claimManage/claimOrder'),
+                meta: { title: '理赔订单'}
+            },
+            {
+                path: 'claimOrderAdd',
+                name: 'claimOrderAdd',
+                component: () => import('@/views/claimManage/claimOrderAdd'),
+                meta: { title: '新增理赔'}
+            }
+        ]
+    },
+
     // 账户中心
     {
         path: '/accountCenter',
