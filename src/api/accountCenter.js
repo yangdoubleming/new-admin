@@ -15,9 +15,9 @@ export function getCity(params) {
     })
 }
 
-export function getBankBranch(params) {
+export function getBankBranch(depositBankNo,depositBankCityNo) {
     return request({
-        url: `/company/getBankBranch/${params}`,
+        url: `/company/getBankBranch/${depositBankNo}/${depositBankCityNo}`,
         method: 'get'
     })
 }
@@ -64,5 +64,13 @@ export function getProvince() {
     return request({
         url: `/company/getProvince`,
         method: 'get'
+    })
+}
+
+export function accountRegister(params) {
+    return request({
+        url: `/account/register`,
+        method: 'post',
+        data: params
     })
 }

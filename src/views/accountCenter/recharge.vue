@@ -138,7 +138,7 @@
       </div>
     </el-dialog>
     <!-- 绑定银行卡弹窗 -->
-    <el-dialog title="绑定银行卡" :visible.sync="addBankPop" :close-on-click-modal=false :show-close=false>
+    <el-dialog :title="popText" :visible.sync="addBankPop" :close-on-click-modal=false :show-close=false>
       <el-form :model="setPasswordForm"  label-width="80px" ref="form">
         <el-row :gutter="20">
           <el-col :span="20">
@@ -169,15 +169,64 @@
             </el-form-item>
           </el-col>
           <el-col :span="20">
-            <el-form-item label="开户银行所在地：" :label-width="formLabelWidth">
-              <el-input v-model="setPasswordForm.agaPassword"></el-input>
-            </el-form-item>
+            <el-row :gutter="20">
+              <el-col :span="6">
+                <el-form-item label="开户银行所在地：" :label-width="formLabelWidth">
+                </el-form-item>
+              </el-col>
+              <el-col :span="6">
+                <el-select v-model="account.depositBankProvinceNo" placeholder="选择省" @change="getCity">
+                  <el-option
+                    v-for="item in provinceList"
+                    :key="item.accountCode"
+                    :label="item.accountDesc"
+                    :value="item.accountCode">
+                  </el-option>
+                </el-select>
+              </el-col>
+              <el-col :span="6">
+                <el-select v-model="account.depositBankCityNo" placeholder="选择地区" @change="getBankBranch">
+                  <el-option
+                    v-for="item in cityList"
+                    :key="item.accountCode"
+                    :label="item.accountDesc"
+                    :value="item.accountCode">
+                  </el-option>
+                </el-select>
+              </el-col>
+              <el-col :span="6">
+                <el-select v-model="account.depositBankBranchName" placeholder="选择支行">
+                  <el-option
+                    v-for="item in BankBranchNameList"
+                    :key="item.branchName"
+                    :label="item.branchName"
+                    :value="item.branchName">
+                  </el-option>
+                </el-select>
+              </el-col>
+            </el-row>
           </el-col>
         </el-row>
       </el-form>
       <div slot="footer" class="dialog-footer">
           <el-button @click="addBankPopCancel">取 消</el-button>
-          <el-button type="primary" @click="addBankPopSure">确 定</el-button>
+          <el-button type="primary" @click="addBankPopSure">确认绑定</el-button>
+      </div>
+    </el-dialog>
+    <!-- 支付密码弹窗 -->
+    <el-dialog title="请输入支付密码" :visible.sync="passwordPop" :close-on-click-modal=false :show-close=false>
+      <el-form :model="setPasswordForm"  label-width="80px" ref="form">
+        <el-row :gutter="20">
+          <el-col :span="20">
+            <el-form-item label="密码：" :label-width="formLabelWidth">
+              <el-input v-model="account.paymentPassword"></el-input>
+            </el-form-item>
+          </el-col>
+        </el-row>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+          <el-button @click="passwordPopCancel">取 消</el-button>
+          <el-button type="primary" @click="passwordPopSure">确认绑定</el-button>
       </div>
     </el-dialog>
   </section>
@@ -185,7 +234,7 @@
 
 <script>
     
-  import { accountSsoService, getCity, accountPayment, accountCallBack, accountResetPayPwd, getVerfyCode, getProvince, getBank  } from '@/api/accountCenter'
+  import { accountSsoService, getCity, accountPayment, accountCallBack, accountResetPayPwd, getVerfyCode, getProvince, getBank, getBankBranch, accountRegister   } from '@/api/accountCenter'
   import { accountInfo } from '@/api/orderManage'
   import QRCode from 'qrcodejs2'
   import { setTimeout } from 'timers';
@@ -233,8 +282,27 @@
             paracont:'获取验证码',
             iconDis:false,
             account:{
+                withdrawAccountNo: '',//银行卡号
+                withdrawAccountUserName: '',//持卡人
+                withdrawAccountName: '',//别名
+                paymentPassword: '',//支付密码
+                depositBankNo: '',//提现账户开户银行代码
+                depositBankCityNo: '',//提现账户开户银行城市代码
+                depositBankBranchName: '',//提现账户开户银行支行名称
+                depositBankReserveMobileNum: '',//提现账户预留银行手机号
+                depositBankProvinceNo: '',//省code
+                token: ''//token
             },
-            bankList:[]
+            bankList:[],
+            provinceList:[],
+            cityList:[],
+            BankBranchNameList:[],
+            regular: {
+              phone: /^[1][3,4,5,7,8][0-9]{9}$/,
+              password: /[\u4E00-\u9FA5]/g
+            },
+            passwordPop: false,
+            popText:'绑定银行卡'
           }
       },
       watch: {
@@ -247,7 +315,6 @@
       },
       created() {
         this.fetchData();
-        console.log(11111,this)
       },
       methods: {
           fetchData(){
@@ -261,19 +328,6 @@
                 this.canTakeAccount = this.subAccountClaimBalance;//可提现金额
                 this.passwordStatus = res.data.PayPwdStatus.passwordStatus;//是否设置支付密码 0-未设置 1-已设置
                 if (res.data.account == null) {
-                    //新增绑卡字段
-                    this.account = {
-                        withdrawAccountNo: '',//银行卡号
-                        withdrawAccountUserName: '',//持卡人
-                        withdrawAccountName: '',//别名
-                        paymentPassword: '',//支付密码
-                        depositBankNo: '',//提现账户开户银行代码
-                        depositBankCityNo: '',//提现账户开户银行城市代码
-                        depositBankBranchName: '',//提现账户开户银行支行名称
-                        depositBankReserveMobileNum: '',//提现账户预留银行手机号
-                        depositBankProvinceNo: '',//省code
-                        token: ''//token
-                    };
                     this.popText = '绑定银行卡';
                     this.isAdd = true;
                 } else {
@@ -299,21 +353,29 @@
         },
         //获取城市
         getCity () {
-            if (this.account.depositBankProvinceNo != '') {
-                getCity(this.account.depositBankProvinceNo).then(result =>{
-                  this.cityList = result.data;
-                })
-            }
+          if(!this.account.depositBankNo){
+            this.$message.error('请选择开户银行')
+            return
+          }
+          if (this.account.depositBankProvinceNo) {
+            getCity(this.account.depositBankProvinceNo).then(result =>{
+              this.cityList = result.data;
+            })
+          }
         },
         //获取开启银行
         getBankBranch () {
-            if (this.account.depositBankNo == '') {
+            if (!this.account.depositBankNo) {
                 this.$message.error('请选择开户银行')
             }
-            if (this.account.depositBankNo != '' && this.account.depositBankCityNo != '') {
-                getBankBranch(this.account.depositBankCityNo).then(result =>{
+            if (this.account.depositBankNo && this.account.depositBankCityNo) {
+                getBankBranch(this.account.depositBankNo, this.account.depositBankCityNo).then(result =>{
                   this.BankBranchNameList = result.data;
+                }).catch(err =>{
+                  this.$message({message:err.msg,type:'error'})
                 })
+            }else{
+              this.$message({message:'请选择地区',type:'error'})
             }
         },
         //充值
@@ -398,7 +460,8 @@
               this.resetPasswordPop = true
               this.changVerifyCodeImg()
           } else {
-              this.addBankPop = true;
+            this.addBankPop = true;
+            setTimeout(()=>{
               //获取银行总行
               getBank().then(result => {
                 this.bankList = result.data
@@ -407,6 +470,7 @@
               getProvince().then(result => {
                 this.provinceList = result.data
               })
+            },100)
           }
         },
         //获取图片验证码
@@ -511,8 +575,67 @@
         addBankPopCancel(){
           this.addBankPop = false;
         },
-        addBankPopSure(){
+        //绑定卡号
+        addBankPopSure () {
+          if (!this.account.withdrawAccountUserName) {
+              this.$message({message:'持卡人不能为空',type:'error'})
+              return
+          }
+          if (!this.account.depositBankReserveMobileNum) {
+              this.$message({message:"银行卡预留手机号不能为空",type:'error'})
+              return
+          } else if (!this.regular.phone.test(this.account.depositBankReserveMobileNum)) {
+              this.$message({message:'银行卡预留手机号格式不正确',type:'error'})
+              return
+          }
+          if (!this.account.withdrawAccountNo) {
+              this.$message({message:'卡号不能为空',type:'error'})
+              return
+          }
+          if (!this.account.depositBankNo || !this.account.depositBankNo) {
+              this.$message({message:'请选择开户银行',type:'error'})
+              return
+          }
+          if (!this.account.depositBankProvinceNo || !this.account.depositBankProvinceNo) {
+              this.$message({message:'请选择开户银行所在地',type:'error'})
+              return
+          }
+          if (!this.account.depositBankCityNo || !this.account.depositBankCityNo) {
+              this.$message({message:'请选择地区',type:'error'})
+              return
+          }
+          if (!this.account.depositBankBranchName) {
+            
+              this.$message({message:'请选择支行',type:'error'})
+              return
+          }
+          
           this.addBankPop = false;
+          this.passwordPop = true;
+        },
+        passwordPopCancel(){
+          this.addBankPop = true;
+          this.passwordPop = false;
+        },
+        //确认添加
+        passwordPopSure () {
+            if (!this.account.paymentPassword) {
+              this.$message({message:'请输入支付密码',type:'error'})
+              return
+            }
+            this.account.token = this.ticket;
+            this.account.withdrawAccountName = this.account.withdrawAccountUserName;
+            accountRegister(this.account).then(result =>{
+              if (result.code == 0) {
+                    this.passwordPop = false;
+                    this.isAdd = false;
+                    this.account.depositBankBranchNameShow = this.account.depositBankBranchName;
+                    this.account.withdrawAccountNoShow = '**** **** **** **** ' + this.account.withdrawAccountNo.substr(-4);
+                }
+                this.$message({message:result.msg,type:'success'})
+            }).catch(err =>{
+              this.$message({message:err.msg,type:'error'})
+            })
         }
       }
   }      
