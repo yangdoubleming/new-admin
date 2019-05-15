@@ -237,10 +237,22 @@
                         })
                         .then(() => {
                             goPay(this.payInfo).then(result=>{
-                            console.log(8888,result)
-                            this.$message.success(result.msg);
+                                this.$message.success(result.msg);
                             }).catch(err =>{
-                            this.$message.error(err);
+                                if (err.msg == '可支付余额不足') {
+                                this.$confirm('您的余额不足，请充值', '提示', {
+                                    confirmButtonText: '去充值',
+                                    cancelButtonText: '取消',
+                                    type: 'info',
+                                    center: true
+                                }).then(() => {
+                                    this.$router.push({path:'/accountCenter/recharge'})
+                                }).catch(() => {
+                                        
+                                });
+                                } else {
+                                    this.$message.error(err.msg||"操作失败");
+                                }
                             })
                         })
                         .catch(action => {

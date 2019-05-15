@@ -60,7 +60,7 @@
           <el-button type="text" icon="el-icon-money">理赔款提现</el-button>
       </div>
       <el-row type="flex" class="row-bg" justify="space-between" >
-        <el-col :span="6"><div class="">您的可提现金额为：{{details.ticketNo}}元</div></el-col>
+        <el-col :span="6"><div class="">您的可提现金额为：{{canTakeAccount}}元</div></el-col>
         <el-col :span="6">
             <el-form :inline="true" :model="rechargeForm" :rules="rechargeFormRules" ref="rechargeForm">
                 <el-form-item label="提现金额" prop="phoneNo">
@@ -244,7 +244,7 @@
   export default {
       data() {
           return {
-            details:{},
+            canTakeAccount:'',
             rechargeForm:{
 
             },
