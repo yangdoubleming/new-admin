@@ -47,11 +47,13 @@
       <div slot="header" class="clearfix">
           <el-button type="text" icon="el-icon-money">绑定提现银行卡</el-button>
       </div>
-      <el-row type="flex" class="row-bg" justify="space-between" >
-        <el-col :span="8">
-            <el-button type="primary" style="margin-right:20px" v-show="isAdd" @click="addBankPopShow">新增</el-button>
-            <el-button type="primary" style="margin-right:20px" v-show="!isAdd">编辑</el-button>
-            <el-button type="danger" v-show="!isAdd">解绑</el-button>
+      <el-row :gutter="20">
+        <el-col :span="5" v-if="account.withdrawAccountNoShow"><div class="">{{account.withdrawAccountNoShow}}</div></el-col>
+        <el-col :span="5" v-if="account.withdrawAccountNoShow"><div class="">{{account.depositBankBranchNameShow}}</div></el-col>
+        <el-col :span="6">
+          <el-button type="primary" style="margin-right:20px" v-show="isAdd" @click="addBankPopShow">新增</el-button>
+          <el-button type="primary" style="margin-right:20px" v-show="!isAdd" @click="addBankPopShow">编辑</el-button>
+          <el-button type="danger" v-show="!isAdd" @click="addBankPopShow('clear')">解绑</el-button>
         </el-col>
       </el-row>
     </el-card>
@@ -210,7 +212,8 @@
       </el-form>
       <div slot="footer" class="dialog-footer">
           <el-button @click="addBankPopCancel">取 消</el-button>
-          <el-button type="primary" @click="addBankPopSure">确认绑定</el-button>
+          <el-button type="primary" @click="addBankPopSure" v-if="isAdd">确认绑定</el-button>
+          <el-button type="primary" @click="addBankPopSure" v-else>确认修改</el-button>
       </div>
     </el-dialog>
     <!-- 支付密码弹窗 -->
@@ -224,9 +227,14 @@
           </el-col>
         </el-row>
       </el-form>
-      <div slot="footer" class="dialog-footer">
+      <div slot="footer" class="dialog-footer" v-if='clearShow'>
+          <el-button @click="toEditBlankCancel">取 消</el-button>
+          <el-button type="primary" @click="toEditBlank">解绑</el-button>
+      </div>
+      <div slot="footer" class="dialog-footer" v-else>
           <el-button @click="passwordPopCancel">取 消</el-button>
-          <el-button type="primary" @click="passwordPopSure">确认绑定</el-button>
+          <el-button type="primary" @click="toAddBlank" v-if='isAdd'>确认</el-button>
+          <el-button type="primary" @click="toEditBlank" v-else>确认</el-button>
       </div>
     </el-dialog>
   </section>
@@ -234,7 +242,7 @@
 
 <script>
     
-  import { accountSsoService, getCity, accountPayment, accountCallBack, accountResetPayPwd, getVerfyCode, getProvince, getBank, getBankBranch, accountRegister   } from '@/api/accountCenter'
+  import { accountSsoService, getCity, accountPayment, accountCallBack, accountResetPayPwd, getVerfyCode, getProvince, getBank, getBankBranch, accountRegister, accountUpdate } from '@/api/accountCenter'
   import { accountInfo } from '@/api/orderManage'
   import QRCode from 'qrcodejs2'
   import { setTimeout } from 'timers';
@@ -302,7 +310,8 @@
               password: /[\u4E00-\u9FA5]/g
             },
             passwordPop: false,
-            popText:'绑定银行卡'
+            popText:'绑定银行卡',
+            clearShow: false
           }
       },
       watch: {
@@ -455,22 +464,27 @@
           this.$refs.qrcode.innerHTML=""
         },
         //绑定银行卡弹出层
-        addBankPopShow () {
-          if (this.passwordStatus == 0) {
+        addBankPopShow (val) {
+          if(val==='clear'){
+            this.clearShow = true;
+            this.passwordPop = true;
+          }else{
+            if (this.passwordStatus == 0) {
               this.resetPasswordPop = true
               this.changVerifyCodeImg()
-          } else {
-            this.addBankPop = true;
-            setTimeout(()=>{
-              //获取银行总行
-              getBank().then(result => {
-                this.bankList = result.data
-              })
-              //获取省份信息
-              getProvince().then(result => {
-                this.provinceList = result.data
-              })
-            },100)
+            } else {
+              this.addBankPop = true;
+              setTimeout(()=>{
+                //获取银行总行
+                getBank().then(result => {
+                  this.bankList = result.data
+                })
+                //获取省份信息
+                getProvince().then(result => {
+                  this.provinceList = result.data
+                })
+              },100)
+            }
           }
         },
         //获取图片验证码
@@ -618,7 +632,7 @@
           this.passwordPop = false;
         },
         //确认添加
-        passwordPopSure () {
+        toAddBlank () {
             if (!this.account.paymentPassword) {
               this.$message({message:'请输入支付密码',type:'error'})
               return
@@ -636,6 +650,47 @@
             }).catch(err =>{
               this.$message({message:err.msg,type:'error'})
             })
+        },
+        //确认修改
+        toEditBlank () {
+          if (!this.account.paymentPassword) {
+              this.$message({message:'请输入支付密码',type:'error'})
+              return false
+          }
+          this.account.token = this.ticket;
+          this.account.withdrawAccountName = this.account.withdrawAccountUserName;
+          accountUpdate(this.account).then(result=>{
+            this.account.depositBankBranchNameShow = this.account.depositBankBranchName;
+            this.account.withdrawAccountNoShow = '**** **** **** **** ' + this.account.withdrawAccountNo.substr(-4);
+            this.passwordPop = false;
+            this.account.paymentPassword = '';
+            this.$message({message:result.msg,type:'success'})
+          }).catch(err=>{
+            this.$message({message:err.msg,type:'error'})
+          })
+        },
+        //确认解绑
+        toClearBlank () {
+            if (!this.account.paymentPassword) {
+              this.$message({message:'请输入支付密码',type:'error'})
+              return false
+            }
+            $api.post('/account/delete', angular.toJson({
+                withdrawCurrency: '156',
+                paymentPassword: vm.account.paymentPassword,
+                token: vm.ticket
+            }), function (result) {
+                if (result.code == 0) {
+                    vm.clearBankPop = false;
+                    vm.isAdd = true;
+                    vm.account = {};
+                }
+                layer.msg(result.msg, {time: 1000});
+            });
+        },
+        // 取消解绑操作
+        toEditBlankCancel(){
+
         }
       }
   }      

@@ -74,3 +74,11 @@ export function accountRegister(params) {
         data: params
     })
 }
+
+export function accountUpdate(params) {
+    return request({
+        url: `/account/update`,
+        method: 'post',
+        data: params
+    })
+}
